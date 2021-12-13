@@ -4,9 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Target
   - Wall
   - Agent
+  - Goal
   layers:
   - Default
   - TransparentFX

@@ -1,0 +1,38 @@
+{
+    "FighterAgent": {
+        "checkpoints": [
+            {
+                "steps": 499989,
+                "file_path": "results\\FightTest\\FighterAgent\\FighterAgent-499989.onnx",
+                "reward": 1.0,
+                "creation_time": 1639063121.3284578,
+                "auxillary_file_paths": [
+                    "results\\FightTest\\FighterAgent\\FighterAgent-499989.pt"
+                ]
+            },
+            {
+                "steps": 500053,
+                "file_path": "results\\FightTest\\FighterAgent\\FighterAgent-500053.onnx",
+                "reward": 1.0,
+                "creation_time": 1639063121.4845996,
+                "auxillary_file_paths": [
+                    "results\\FightTest\\FighterAgent\\FighterAgent-500053.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 500053,
+            "file_path": "results\\FightTest\\FighterAgent.onnx",
+            "reward": 1.0,
+            "creation_time": 1639063121.4845996,
+            "auxillary_file_paths": [
+                "results\\FightTest\\FighterAgent\\FighterAgent-500053.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.27.0",
+        "torch_version": "1.8.0"
+    }
+}
