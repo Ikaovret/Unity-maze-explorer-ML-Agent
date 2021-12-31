@@ -7,17 +7,16 @@ public class MazeMeshGenerator
     public float width;     // how wide are hallways
     public float height;    // how tall are hallways
 
-    public MazeMeshGenerator()
+    public MazeMeshGenerator(float givenWidth, float givenHeight)
     {
-        width = 3.75f;
-        height = 3.5f;
+        width = givenWidth;
+        height = givenHeight;
     }
 
     public Mesh FromData(int[,] data)
     {
         Mesh maze = new Mesh();
 
-        //3
         List<Vector3> newVertices = new List<Vector3>();
         List<Vector2> newUVs = new List<Vector2>();
 
@@ -98,7 +97,6 @@ public class MazeMeshGenerator
         maze.SetTriangles(floorTriangles.ToArray(), 0);
         maze.SetTriangles(wallTriangles.ToArray(), 1);
 
-        //5
         maze.RecalculateNormals();
 
         return maze;
