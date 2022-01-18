@@ -20,12 +20,9 @@ public class GameController : MonoBehaviour
 
     private MazeConstructor generator;
 
-    private DateTime startTime;
-    private int timeLimit;
-    private int reduceLimitBy;
-
     private int score;
     private bool goalReached;
+    float time;
 
     void Start() {
         generator = GetComponent<MazeConstructor>();
@@ -34,9 +31,6 @@ public class GameController : MonoBehaviour
 
     private void StartNewGame()
     {
-        timeLimit = 80;
-        reduceLimitBy = 5;
-        startTime = DateTime.Now;
 
         score = 0;
 
@@ -46,10 +40,6 @@ public class GameController : MonoBehaviour
     private void StartNewMaze()
     {
         generator.GenerateNewMaze(sizeRows, sizeCols);
-
-        // restart timer
-        timeLimit -= reduceLimitBy;
-        startTime = DateTime.Now;
     }
 
     void FixedUpdate()
@@ -57,6 +47,12 @@ public class GameController : MonoBehaviour
         if (!agent.enabled)
         {
             return;
+        }
+        time += Time.fixedDeltaTime;
+        if(time > 10)
+        {
+            StartNewMaze();
+            time = 0;
         }
 
         // int timeUsed = (int)(DateTime.Now - startTime).TotalSeconds;

@@ -160,10 +160,12 @@ public class MazeConstructor : MonoBehaviour
 
     public void DisposeOldMaze()
     {
-        GameObject[] objects = GameObject.FindGameObjectsWithTag("Wall");
-        foreach (GameObject go in objects) 
+        foreach(Transform env in environments)
         {
-            Destroy(go);
+            for(int i = 3; i < env.childCount; i++)
+            {
+                Destroy(env.GetChild(i).gameObject);
+            }
         }
     }
 
@@ -264,6 +266,7 @@ public class MazeConstructor : MonoBehaviour
 
     public void ResetGoal(int environment)
     {
+        environments[environment].GetComponentInChildren<MazeAgent>().goals.Clear();
         for(int i = 0; i < environments[environment].GetChild(2).childCount; i++)
         {
             Destroy(environments[environment].GetChild(2).GetChild(i).gameObject);
