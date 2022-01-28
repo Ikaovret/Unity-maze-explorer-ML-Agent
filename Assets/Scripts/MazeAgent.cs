@@ -12,31 +12,36 @@ public class MazeAgent : Agent
     public Transform startPos;
     public List<Transform> goals;
     private Transform hitGoal;
+    LayerMask mask;
+    int width, height, counter;
 
 
     public override void OnEpisodeBegin()
     {
-        // if(startPos != null) transform.localPosition = startPos.localPosition;
-        if(hitGoal != null) 
-        {
-            goals.RemoveAt(hitGoal.GetSiblingIndex());
-            SendMessageUpwards("ResetGoal", new System.Tuple<int, int>(transform.parent.GetSiblingIndex(), hitGoal.GetSiblingIndex()));
-        }
-        hitGoal = null;
+        counter = MaxStep;
+        SendMessageUpwards("ResetGoal", transform.parent.GetSiblingIndex());
+        GameController gc = transform.GetComponentInParent<GameController>();
+        width = gc.sizeCols;
+        height = gc.sizeRows;
+        mask = ~LayerMask.GetMask("Object");
+        if(startPos != null) transform.localPosition = startPos.localPosition;
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        counter--;
         if(IsCloseToGoal())
         {
-            AddReward(1f);
-            EndEpisode();
+            if(hitGoal != null) 
+            {
+                AddReward(counter/MaxStep);
+                goals.RemoveAt(hitGoal.GetSiblingIndex());
+                EndEpisode();
+            }
+            hitGoal = null;
         }
-        AddReward(-0.01f);
         ActionSegment<int> disc = actions.DiscreteActions;
         Vector3 movement = Vector3.zero;
-        LayerMask mask = LayerMask.GetMask("Object");
-        mask = ~mask;
         switch(disc[0])
         {
             case 1:
@@ -57,7 +62,14 @@ public class MazeAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        base.CollectObservations(sensor);
+        float distance = 0;
+
+        if(goals.Count > 0) 
+        {
+            distance = Vector3.Distance(this.transform.localPosition, this.goals[0].localPosition);
+        }
+
+        sensor.AddObservation(distance);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)

@@ -48,12 +48,12 @@ public class GameController : MonoBehaviour
         {
             return;
         }
-        time += Time.fixedDeltaTime;
-        if(time > 10)
-        {
-            StartNewMaze();
-            time = 0;
-        }
+        // time += Time.fixedDeltaTime;
+        // if(time > 10)
+        // {
+        //     StartNewMaze();
+        //     time = 0;
+        // }
 
         // int timeUsed = (int)(DateTime.Now - startTime).TotalSeconds;
         // int timeLeft = timeLimit - timeUsed;
