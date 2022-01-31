@@ -20,7 +20,7 @@ public class GameController : MonoBehaviour
 
     private MazeConstructor generator;
 
-    private int score;
+    private int completedMazeCount, completionsToMazeChange = 5;
     private bool goalReached;
     float time;
 
@@ -29,17 +29,20 @@ public class GameController : MonoBehaviour
         StartNewGame();
     }
 
-    private void StartNewGame()
+    public void StartNewGame()
     {
-
-        score = 0;
-
-        StartNewMaze();
+        generator.GenerateAllMazes(sizeRows, sizeCols);
     }
 
-    private void StartNewMaze()
+    public void ChangeMazeSize(int newRowSize, int newColSize)
     {
-        generator.GenerateNewMaze(sizeRows, sizeCols);
+        sizeRows = newRowSize;
+        sizeCols = newColSize;
+    }
+
+    public void CreateNewMaze(int environment)
+    {
+        generator.GenerateSingleMaze(sizeRows, sizeCols, environment);
     }
 
     void FixedUpdate()
@@ -47,6 +50,11 @@ public class GameController : MonoBehaviour
         if (!agent.enabled)
         {
             return;
+        }
+
+        if(completedMazeCount >= completionsToMazeChange)
+        {
+
         }
         // time += Time.fixedDeltaTime;
         // if(time > 10)
@@ -75,8 +83,6 @@ public class GameController : MonoBehaviour
     {
         Debug.Log("Goal!");
         goalReached = true;
-
-        score += 1;
 
         Destroy(trigger);
     }

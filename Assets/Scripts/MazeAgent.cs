@@ -9,11 +9,14 @@ public class MazeAgent : Agent
 {
     [SerializeField]
     private float step = 3.75f;
+    [SerializeField]
+    private int mazeCountToChange = 5;
     public Transform startPos;
     public List<Transform> goals;
+    public bool stayPut;
     private Transform hitGoal;
     LayerMask mask;
-    int width, height, counter;
+    int width, height, counter, succesfulMazeCount;
 
 
     public override void OnEpisodeBegin()
@@ -30,12 +33,21 @@ public class MazeAgent : Agent
     public override void OnActionReceived(ActionBuffers actions)
     {
         counter--;
+
         if(IsCloseToGoal())
         {
             if(hitGoal != null) 
             {
-                AddReward(counter/MaxStep);
+                succesfulMazeCount++;
+                if(succesfulMazeCount >= mazeCountToChange)
+                {
+                    succesfulMazeCount = 0;
+                    SendMessageUpwards("CreateNewMaze", transform.parent.GetSiblingIndex());
+                }
+
+                AddReward((float)counter/MaxStep);
                 goals.RemoveAt(hitGoal.GetSiblingIndex());
+                SendMessageUpwards("StartNewGame");
                 EndEpisode();
             }
             hitGoal = null;
@@ -57,19 +69,12 @@ public class MazeAgent : Agent
                 if(!Physics.Raycast(transform.position, Vector3.left, step, mask)) movement.x -= step;
                 break;
         }
-        transform.localPosition += movement;
+        if(!stayPut) transform.localPosition += movement;
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        float distance = 0;
-
-        if(goals.Count > 0) 
-        {
-            distance = Vector3.Distance(this.transform.localPosition, this.goals[0].localPosition);
-        }
-
-        sensor.AddObservation(distance);
+        
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -97,5 +102,10 @@ public class MazeAgent : Agent
             }
         }
         return false;
+    }
+
+    public void ResetStayPut()
+    {
+        stayPut = false;
     }
 }

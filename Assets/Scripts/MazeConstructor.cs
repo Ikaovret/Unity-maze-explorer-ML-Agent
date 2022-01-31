@@ -61,14 +61,46 @@ public class MazeConstructor : MonoBehaviour
         };
     }
     
-    public void GenerateNewMaze(int sizeRows, int sizeCols)
+    public void GenerateAllMazes(int sizeRows, int sizeCols)
     {
+        foreach(Transform envi in environments)
+        {
+            if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
+            {
+                Debug.LogError("Odd numbers work better for dungeon size.");
+            }
+
+            // DisposeAllOldMazes();
+            DisposeSingleOldMaze(envi.GetSiblingIndex());
+
+            data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+
+            FindStartPosition();
+            FindGoalPosition();
+
+            // store values used to generate this mesh
+            hallWidth = meshGenerator.width;
+            hallHeight = meshGenerator.height;
+
+            // DisplayAllMazes();
+            DisplaySingleMaze(envi.GetSiblingIndex());
+
+            PlaceStartTrigger(envi);
+            ResetGoal(envi.GetSiblingIndex());
+        }
+    }
+    
+    public void GenerateSingleMaze(int sizeRows, int sizeCols, int environment)
+    {
+        if(environment >= environments.Length || environment < 0) return;
+
         if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
         {
             Debug.LogError("Odd numbers work better for dungeon size.");
         }
 
-        DisposeOldMaze();
+        // DisposeAllOldMazes();
+        DisposeSingleOldMaze(environment);
 
         data = dataGenerator.FromDimensions(sizeRows, sizeCols);
 
@@ -79,24 +111,21 @@ public class MazeConstructor : MonoBehaviour
         hallWidth = meshGenerator.width;
         hallHeight = meshGenerator.height;
 
-        DisplayMaze();
+        // DisplayAllMazes();
+        DisplaySingleMaze(environment);
 
-        foreach(Transform envi in environments)
-        {
-            PlaceStartTrigger(envi);
-            ResetGoal(envi.GetSiblingIndex());
-        }
+        PlaceStartTrigger(environments[environment]);
+        ResetGoal(environment);
     }
 
-    private void DisplayMaze()
+    private void DisplayAllMazes()
     {
         GameObject go = new GameObject();
-        go.transform.SetParent(transform);
+        go.transform.SetParent(environments[0]);
         go.name = "Procedural Maze";
         go.tag = "Wall";
         go.layer = 9;
 
-        go.transform.SetParent(environments[0]);
         go.transform.localPosition = Vector3.zero;
 
         float x = startCol * hallWidth;
@@ -123,42 +152,37 @@ public class MazeConstructor : MonoBehaviour
             y = environments[i].GetChild(0).localScale.y / 2f;
             z = startRow * hallWidth;
             environments[i].GetChild(0).localPosition = new Vector3(x, y, z);
-        }        
+        } 
     }
-    
-    void OnGUI()
+
+    private void DisplaySingleMaze(int environment)
     {
-        if (!showDebug)
-        {
-            return;
-        }
+        if(environment >= environments.Length || environment < 0) return;
 
-        int[,] maze = data;
-        int rMax = maze.GetUpperBound(0);
-        int cMax = maze.GetUpperBound(1);
+        GameObject go = new GameObject();
+        go.transform.SetParent(environments[environment]);
+        go.name = "Procedural Maze";
+        go.tag = "Wall";
+        go.layer = 9;
 
-        string msg = "";
+        go.transform.localPosition = Vector3.zero;
 
-        for (int i = rMax; i >= 0; i--)
-        {
-            for (int j = 0; j <= cMax; j++)
-            {
-                if (maze[i, j] == 0)
-                {
-                    msg += "....";
-                }
-                else
-                {
-                    msg += "==";
-                }
-            }
-            msg += "\n";
-        }
+        float x = startCol * hallWidth;
+        float y = environments[environment].GetChild(0).localScale.y / 2f;
+        float z = startRow * hallWidth;
+        environments[environment].GetChild(0).localPosition = new Vector3(x, y, z);
 
-        GUI.Label(new Rect(20, 20, 500, 500), msg);
+        MeshFilter mf = go.AddComponent<MeshFilter>();
+        mf.mesh = meshGenerator.FromData(data);
+        
+        MeshCollider mc = go.AddComponent<MeshCollider>();
+        mc.sharedMesh = mf.mesh;
+
+        MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        mr.materials = new Material[2] {mazeMat1, mazeMat2};
     }
 
-    public void DisposeOldMaze()
+    public void DisposeAllOldMazes()
     {
         foreach(Transform env in environments)
         {
@@ -166,6 +190,15 @@ public class MazeConstructor : MonoBehaviour
             {
                 Destroy(env.GetChild(i).gameObject);
             }
+        }
+    }
+
+    public void DisposeSingleOldMaze(int environment)
+    {
+        if(environment >= environments.Length || environment < 0) return;
+        for(int i = 3; i < environments[environment].childCount; i++)
+        {
+            Destroy(environments[environment].GetChild(i).gameObject);
         }
     }
 
@@ -287,7 +320,8 @@ public class MazeConstructor : MonoBehaviour
     public Vector3 RandomizeGoalPlacement(Transform environment)
     {
         List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.position);
-        return goalLocations[Random.Range(0, goalLocations.Count)];
+        // return goalLocations[Random.Range(0, goalLocations.Count)];
+        return goalLocations[goalLocations.Count-1];
     }
 
     private List<Vector3> CollectPossibleGoalLocations(Vector3 raycastOrigin)
@@ -317,5 +351,37 @@ public class MazeConstructor : MonoBehaviour
         }
 
         return goalLocations;
+    }
+    
+    void OnGUI()
+    {
+        if (!showDebug)
+        {
+            return;
+        }
+
+        int[,] maze = data;
+        int rMax = maze.GetUpperBound(0);
+        int cMax = maze.GetUpperBound(1);
+
+        string msg = "";
+
+        for (int i = rMax; i >= 0; i--)
+        {
+            for (int j = 0; j <= cMax; j++)
+            {
+                if (maze[i, j] == 0)
+                {
+                    msg += "....";
+                }
+                else
+                {
+                    msg += "==";
+                }
+            }
+            msg += "\n";
+        }
+
+        GUI.Label(new Rect(20, 20, 500, 500), msg);
     }
 }

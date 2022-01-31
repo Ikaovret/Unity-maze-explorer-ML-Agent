@@ -201,7 +201,7 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 126825371891627920}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1308240305}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 07f0fcf086aa8144090f9f21bee884ac, type: 3}
@@ -456,28 +456,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!1 &1308240305 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 126825371834707010, guid: 6546a1f44ddf17f46879b46607cb637b,
-    type: 3}
-  m_PrefabInstance: {fileID: 126825371891627920}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1308240313
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1308240305}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2902496c0120472b90269f94a0aec7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Record: 1
-  NumStepsToRecord: 10000
-  DemonstrationName: MazeDemonstration
-  DemonstrationDirectory: 
 --- !u!1001 &1311429396
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -601,8 +579,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 212704217}
-  m_sizeRows: 17
-  m_sizeCols: 21
+  m_sizeRows: 13
+  m_sizeCols: 15
 --- !u!114 &1936323597
 MonoBehaviour:
   m_ObjectHideFlags: 0
