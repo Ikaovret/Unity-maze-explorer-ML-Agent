@@ -16,18 +16,31 @@ public class MazeAgent : Agent
     public bool stayPut;
     private Transform hitGoal;
     LayerMask mask;
-    int width, height, counter, succesfulMazeCount;
-
+    int width, height, counter, mazesTillChange = -1;
 
     public override void OnEpisodeBegin()
     {
+        mazesTillChange++;
+        if(mazesTillChange >= mazeCountToChange)
+        {
+            mazesTillChange = 0;
+            SendMessageUpwards("CreateNewMaze", transform.parent.GetSiblingIndex());
+        }
         counter = MaxStep;
         SendMessageUpwards("ResetGoal", transform.parent.GetSiblingIndex());
         GameController gc = transform.GetComponentInParent<GameController>();
         width = gc.sizeCols;
         height = gc.sizeRows;
         mask = ~LayerMask.GetMask("Object");
-        if(startPos != null) transform.localPosition = startPos.localPosition;
+        if(startPos != null) 
+        {
+            Vector3 pos = Vector3.zero;
+            pos.x = startPos.localPosition.x;
+            pos.y = transform.localPosition.y;
+            pos.z = startPos.localPosition.z;
+
+            transform.localPosition = pos;
+        }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -38,16 +51,8 @@ public class MazeAgent : Agent
         {
             if(hitGoal != null) 
             {
-                succesfulMazeCount++;
-                if(succesfulMazeCount >= mazeCountToChange)
-                {
-                    succesfulMazeCount = 0;
-                    SendMessageUpwards("CreateNewMaze", transform.parent.GetSiblingIndex());
-                }
-
                 AddReward((float)counter/MaxStep);
                 goals.RemoveAt(hitGoal.GetSiblingIndex());
-                SendMessageUpwards("StartNewGame");
                 EndEpisode();
             }
             hitGoal = null;
@@ -72,9 +77,10 @@ public class MazeAgent : Agent
         if(!stayPut) transform.localPosition += movement;
     }
 
+    // Kept so that it can be expanded in the future
     public override void CollectObservations(VectorSensor sensor)
     {
-        
+        base.CollectObservations(sensor);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -86,11 +92,10 @@ public class MazeAgent : Agent
         if(Input.GetKey(KeyCode.A)) disc[0] = 4;
     }
 
-    private void OnDrawGizmos() 
-    {
-        Gizmos.DrawRay(transform.position, Vector3.forward * step);
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     private bool IsCloseToGoal()
     {
         foreach(Transform tran in goals)
@@ -102,10 +107,5 @@ public class MazeAgent : Agent
             }
         }
         return false;
-    }
-
-    public void ResetStayPut()
-    {
-        stayPut = false;
     }
 }

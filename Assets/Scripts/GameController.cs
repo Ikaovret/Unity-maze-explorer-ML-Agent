@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.MLAgents;
 
 [RequireComponent(typeof(MazeConstructor))]
 
@@ -22,79 +23,45 @@ public class GameController : MonoBehaviour
 
     private int completedMazeCount, completionsToMazeChange = 5;
     private bool goalReached;
+    private EnvironmentParameters env;
     float time;
 
-    void Start() {
+    void Start() 
+    {
+        env = Academy.Instance.EnvironmentParameters;
         generator = GetComponent<MazeConstructor>();
+        sizeRows = (int)env.GetWithDefault("MazeSize", 21);
+        sizeCols = sizeRows + 2;
         StartNewGame();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void StartNewGame()
     {
         generator.GenerateAllMazes(sizeRows, sizeCols);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="newRowSize"></param>
+    /// <param name="newColSize"></param>
     public void ChangeMazeSize(int newRowSize, int newColSize)
     {
         sizeRows = newRowSize;
         sizeCols = newColSize;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="environment"></param>
     public void CreateNewMaze(int environment)
     {
+        sizeRows = (int)env.GetWithDefault("MazeSize", 21);
+        sizeCols = sizeRows + 2;
         generator.GenerateSingleMaze(sizeRows, sizeCols, environment);
-    }
-
-    void FixedUpdate()
-    {
-        if (!agent.enabled)
-        {
-            return;
-        }
-
-        if(completedMazeCount >= completionsToMazeChange)
-        {
-
-        }
-        // time += Time.fixedDeltaTime;
-        // if(time > 10)
-        // {
-        //     StartNewMaze();
-        //     time = 0;
-        // }
-
-        // int timeUsed = (int)(DateTime.Now - startTime).TotalSeconds;
-        // int timeLeft = timeLimit - timeUsed;
-
-        // if (timeLeft > 0)
-        // {
-        //     timeLabel.text = timeLeft.ToString();
-        // }
-        // else
-        // {
-        //     timeLabel.text = "TIME UP";
-        //     agent.enabled = false;
-
-        //     Invoke("StartNewGame", 4);
-        // }
-    }
-
-    private void OnGoalTrigger(GameObject trigger, GameObject other)
-    {
-        Debug.Log("Goal!");
-        goalReached = true;
-
-        Destroy(trigger);
-    }
-
-    private void OnStartTrigger(GameObject trigger, GameObject other)
-    {
-        if (goalReached)
-        {
-            Debug.Log("Finish!");
-            agent.enabled = false;
-
-            Invoke("StartNewMaze", 4);
-        }
     }
 }

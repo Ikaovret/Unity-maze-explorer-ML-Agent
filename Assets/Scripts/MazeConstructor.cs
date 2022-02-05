@@ -13,37 +13,15 @@ public class MazeConstructor : MonoBehaviour
     [SerializeField] private int goalCount = 4;
 
     [SerializeField] private float width = 3.75f, height = 3.5f;
+    [SerializeField, Tooltip("Toggles whether or not goals are placed at random.\nIf goal count > 1 all goals will be stacked of top of each other")]
+    private bool randomizeGoals = false;
 
     private MazeDataGenerator dataGenerator;
     private MazeMeshGenerator meshGenerator;
+    
+    private int cols, rows;
 
     public int[,] data
-    {
-        get; private set;
-    }
-    public float hallWidth
-    {
-        get; private set;
-    }
-    public float hallHeight
-    {
-        get; private set;
-    }
-
-    public int startRow
-    {
-        get; private set;
-    }
-    public int startCol
-    {
-        get; private set;
-    }
-
-    public int goalRow
-    {
-        get; private set;
-    }
-    public int goalCol
     {
         get; private set;
     }
@@ -61,28 +39,27 @@ public class MazeConstructor : MonoBehaviour
         };
     }
     
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sizeRows"></param>
+    /// <param name="sizeCols"></param>
     public void GenerateAllMazes(int sizeRows, int sizeCols)
     {
+        if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
+        {
+            Debug.LogError("Odd numbers work better for dungeon size.");
+        }
+
+        rows = sizeRows;
+        cols = sizeCols;
+
         foreach(Transform envi in environments)
         {
-            if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
-            {
-                Debug.LogError("Odd numbers work better for dungeon size.");
-            }
-
-            // DisposeAllOldMazes();
             DisposeSingleOldMaze(envi.GetSiblingIndex());
 
             data = dataGenerator.FromDimensions(sizeRows, sizeCols);
 
-            FindStartPosition();
-            FindGoalPosition();
-
-            // store values used to generate this mesh
-            hallWidth = meshGenerator.width;
-            hallHeight = meshGenerator.height;
-
-            // DisplayAllMazes();
             DisplaySingleMaze(envi.GetSiblingIndex());
 
             PlaceStartTrigger(envi);
@@ -90,6 +67,12 @@ public class MazeConstructor : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sizeRows"></param>
+    /// <param name="sizeCols"></param>
+    /// <param name="environment"></param>
     public void GenerateSingleMaze(int sizeRows, int sizeCols, int environment)
     {
         if(environment >= environments.Length || environment < 0) return;
@@ -99,62 +82,23 @@ public class MazeConstructor : MonoBehaviour
             Debug.LogError("Odd numbers work better for dungeon size.");
         }
 
-        // DisposeAllOldMazes();
+        rows = sizeRows;
+        cols = sizeCols;
+
         DisposeSingleOldMaze(environment);
 
         data = dataGenerator.FromDimensions(sizeRows, sizeCols);
 
-        FindStartPosition();
-        FindGoalPosition();
-
-        // store values used to generate this mesh
-        hallWidth = meshGenerator.width;
-        hallHeight = meshGenerator.height;
-
-        // DisplayAllMazes();
         DisplaySingleMaze(environment);
 
         PlaceStartTrigger(environments[environment]);
         ResetGoal(environment);
     }
 
-    private void DisplayAllMazes()
-    {
-        GameObject go = new GameObject();
-        go.transform.SetParent(environments[0]);
-        go.name = "Procedural Maze";
-        go.tag = "Wall";
-        go.layer = 9;
-
-        go.transform.localPosition = Vector3.zero;
-
-        float x = startCol * hallWidth;
-        float y = environments[0].GetChild(0).localScale.y / 2f;
-        float z = startRow * hallWidth;
-        environments[0].GetChild(0).localPosition = new Vector3(x, y, z);
-
-        MeshFilter mf = go.AddComponent<MeshFilter>();
-        mf.mesh = meshGenerator.FromData(data);
-        
-        MeshCollider mc = go.AddComponent<MeshCollider>();
-        mc.sharedMesh = mf.mesh;
-
-        MeshRenderer mr = go.AddComponent<MeshRenderer>();
-        mr.materials = new Material[2] {mazeMat1, mazeMat2};
-
-        for(int i = 1; i < environments.Length; i++)
-        {
-            GameObject g = GameObject.Instantiate(go, environments[i].position, Quaternion.identity);
-            g.transform.SetParent(environments[i]);
-            g.transform.localPosition = Vector3.zero;
-
-            x = startCol * hallWidth;
-            y = environments[i].GetChild(0).localScale.y / 2f;
-            z = startRow * hallWidth;
-            environments[i].GetChild(0).localPosition = new Vector3(x, y, z);
-        } 
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="environment"></param>
     private void DisplaySingleMaze(int environment)
     {
         if(environment >= environments.Length || environment < 0) return;
@@ -167,9 +111,9 @@ public class MazeConstructor : MonoBehaviour
 
         go.transform.localPosition = Vector3.zero;
 
-        float x = startCol * hallWidth;
+        float x = width;
         float y = environments[environment].GetChild(0).localScale.y / 2f;
-        float z = startRow * hallWidth;
+        float z = width;
         environments[environment].GetChild(0).localPosition = new Vector3(x, y, z);
 
         MeshFilter mf = go.AddComponent<MeshFilter>();
@@ -182,17 +126,10 @@ public class MazeConstructor : MonoBehaviour
         mr.materials = new Material[2] {mazeMat1, mazeMat2};
     }
 
-    public void DisposeAllOldMazes()
-    {
-        foreach(Transform env in environments)
-        {
-            for(int i = 3; i < env.childCount; i++)
-            {
-                Destroy(env.GetChild(i).gameObject);
-            }
-        }
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="environment"></param>
     public void DisposeSingleOldMaze(int environment)
     {
         if(environment >= environments.Length || environment < 0) return;
@@ -202,47 +139,10 @@ public class MazeConstructor : MonoBehaviour
         }
     }
 
-    private void FindStartPosition()
-    {
-        int[,] maze = data;
-        int rMax = maze.GetUpperBound(0);
-        int cMax = maze.GetUpperBound(1);
-
-        for (int i = 0; i <= rMax; i++)
-        {
-            for (int j = 0; j <= cMax; j++)
-            {
-                if (maze[i, j] == 0)
-                {
-                    startRow = i;
-                    startCol = j;
-                    return;
-                }
-            }
-        }
-    }
-
-    private void FindGoalPosition()
-    {
-        int[,] maze = data;
-        int rMax = maze.GetUpperBound(0);
-        int cMax = maze.GetUpperBound(1);
-
-        // loop top to bottom, right to left
-        for (int i = rMax; i >= 0; i--)
-        {
-            for (int j = cMax; j >= 0; j--)
-            {
-                if (maze[i, j] == 0)
-                {
-                    goalRow = i;
-                    goalCol = j;
-                    return;
-                }
-            }
-        }
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="location"></param>
     private void PlaceStartTrigger(Transform location = null)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -251,7 +151,7 @@ public class MazeConstructor : MonoBehaviour
             go.transform.SetParent(location);
             location.GetComponentInChildren<MazeAgent>().startPos = go.transform;
         }
-        go.transform.localPosition = new Vector3(startCol * hallWidth, .5f, startRow * hallWidth);
+        go.transform.localPosition = new Vector3(width, .5f, width);
         go.name = "Start Trigger";
         go.tag = "Untagged";
         go.layer = 8;
@@ -261,6 +161,10 @@ public class MazeConstructor : MonoBehaviour
         go.SetActive(false);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="location"></param>
     private void PlaceGoalTrigger(Transform location = null)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -272,10 +176,6 @@ public class MazeConstructor : MonoBehaviour
             go.transform.SetParent(location.GetChild(2));
             go.transform.localPosition = RandomizeGoalPlacement(location);
         }
-        else
-        {
-            go.transform.localPosition = new Vector3(goalCol * hallWidth, 1.5f, goalRow * hallWidth);
-        }
         go.name = "Treasure";
         go.tag = "Goal";
         go.layer = 8;
@@ -284,19 +184,10 @@ public class MazeConstructor : MonoBehaviour
         go.GetComponent<MeshRenderer>().sharedMaterial = treasureMat;
     }
 
-    private void PlaceGoalTrigger(Vector3 position)
-    {
-        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        go.transform.localScale = new Vector3(3, 3, 3);
-        go.transform.position = position;
-        go.name = "Treasure";
-        go.tag = "Goal";
-        go.layer = 8;
-
-        go.GetComponent<BoxCollider>().isTrigger = true;
-        go.GetComponent<MeshRenderer>().sharedMaterial = treasureMat;
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="environment"></param>
     public void ResetGoal(int environment)
     {
         environments[environment].GetComponentInChildren<MazeAgent>().goals.Clear();
@@ -311,19 +202,37 @@ public class MazeConstructor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="data"></param>
     public void ResetGoal(System.Tuple<int, int> data)
     {
         Destroy(environments[data.Item1].GetChild(2).GetChild(data.Item2).gameObject);
         PlaceGoalTrigger(environments[data.Item1]);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="environment"></param>
+    /// <returns></returns>
     public Vector3 RandomizeGoalPlacement(Transform environment)
     {
-        List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.position);
-        // return goalLocations[Random.Range(0, goalLocations.Count)];
-        return goalLocations[goalLocations.Count-1];
+        if(randomizeGoals)
+        {
+            List<Vector3> goalLocations = CollectPossibleGoalLocations(environment.position);
+            return goalLocations[Random.Range(0, goalLocations.Count)];
+        }
+        else return new Vector3(width*rows, 1.5f, width*(cols-4));
+        
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="raycastOrigin"></param>
+    /// <returns></returns>
     private List<Vector3> CollectPossibleGoalLocations(Vector3 raycastOrigin)
     {
         int sizeCols = GetComponent<GameController>().sizeCols;
