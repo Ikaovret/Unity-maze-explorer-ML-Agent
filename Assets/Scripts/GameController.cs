@@ -7,8 +7,9 @@ using Unity.MLAgents;
 
 public class GameController : MonoBehaviour
 {
-    [SerializeField] private MazeAgent agent;
     [SerializeField] private int m_sizeRows = 13, m_sizeCols = 15;
+    [SerializeField] private bool examinationMode = false;
+
     public int sizeRows
     { 
         get { return m_sizeRows; } private set { m_sizeRows = value; }
@@ -30,21 +31,22 @@ public class GameController : MonoBehaviour
     {
         env = Academy.Instance.EnvironmentParameters;
         generator = GetComponent<MazeConstructor>();
-        sizeRows = (int)env.GetWithDefault("MazeSize", 21);
-        sizeCols = sizeRows + 2;
+        int envParam = (int)env.GetWithDefault("MazeSize", 21);
+        ChangeMazeSize(envParam, envParam+2);
         StartNewGame();
     }
 
     /// <summary>
-    /// 
+    /// Starts the game. If examinationMode is true, starts the examination mode.
     /// </summary>
     public void StartNewGame()
     {
-        generator.GenerateAllMazes(sizeRows, sizeCols);
+        if(!examinationMode) generator.GenerateAllMazes(sizeRows, sizeCols);
+        else generator.GenerateExaminationMazes(sizeRows, sizeCols);
     }
 
     /// <summary>
-    /// 
+    /// Changes the next generated mazes size.
     /// </summary>
     /// <param name="newRowSize"></param>
     /// <param name="newColSize"></param>
@@ -55,13 +57,13 @@ public class GameController : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Used to create a new maze for a specific agent.
     /// </summary>
     /// <param name="environment"></param>
     public void CreateNewMaze(int environment)
     {
-        sizeRows = (int)env.GetWithDefault("MazeSize", 21);
-        sizeCols = sizeRows + 2;
+        int envParam = (int)env.GetWithDefault("MazeSize", 21);
+        ChangeMazeSize(envParam, envParam+2);
         generator.GenerateSingleMaze(sizeRows, sizeCols, environment);
     }
 }

@@ -3,21 +3,21 @@ using UnityEngine;
 
 public class MazeConstructor : MonoBehaviour
 {
+    [SerializeField, Tooltip("Toggles whether or not goals are placed at random.\nWhen true and if goal count > 1, goal count is set to 1")]
+    private bool randomizeGoals = false;
     public bool showDebug;
     
     [SerializeField] private Material mazeMat1;
     [SerializeField] private Material mazeMat2;
     [SerializeField] private Material startMat;
     [SerializeField] private Material treasureMat;
-    [SerializeField] private Transform[] environments;
     [SerializeField] private int goalCount = 4;
-
     [SerializeField] private float width = 3.75f, height = 3.5f;
-    [SerializeField, Tooltip("Toggles whether or not goals are placed at random.\nIf goal count > 1 all goals will be stacked of top of each other")]
-    private bool randomizeGoals = false;
+
 
     private MazeDataGenerator dataGenerator;
     private MazeMeshGenerator meshGenerator;
+    private Transform[] environments;
     
     private int cols, rows;
 
@@ -37,10 +37,18 @@ public class MazeConstructor : MonoBehaviour
             {1, 0, 1},
             {1, 1, 1}
         };
+
+        environments = new Transform[transform.childCount];
+        for(int i = 0; i < transform.childCount; i++)
+        {
+            environments[i] = transform.GetChild(i);
+        }
+
+        if(!randomizeGoals) goalCount = 1;
     }
     
     /// <summary>
-    /// 
+    /// Generates a new maze of the given size into each of the environemnts in the scene
     /// </summary>
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
@@ -68,7 +76,7 @@ public class MazeConstructor : MonoBehaviour
     }
     
     /// <summary>
-    /// 
+    /// Generates a single new maze of the given size to the given environment
     /// </summary>
     /// <param name="sizeRows"></param>
     /// <param name="sizeCols"></param>
@@ -96,7 +104,33 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Generates one maze of the given size and then copies it to each environment
+    /// </summary>
+    /// <param name="sizeRows"></param>
+    /// <param name="sizeCols"></param>
+    public void GenerateExaminationMazes(int sizeRows, int sizeCols)
+    {
+        if (sizeRows % 2 == 0 && sizeCols % 2 == 0)
+        {
+            Debug.LogError("Odd numbers work better for dungeon size.");
+        }
+
+        rows = sizeRows;
+        cols = sizeCols;
+
+        data = dataGenerator.FromDimensions(sizeRows, sizeCols);
+
+        DisplayExaminationMazes();
+
+        foreach(Transform envi in environments)
+        {
+            PlaceStartTrigger(envi);
+            ResetGoal(envi.GetSiblingIndex());
+        }
+    }
+
+    /// <summary>
+    /// Handles the creation of a single maze
     /// </summary>
     /// <param name="environment"></param>
     private void DisplaySingleMaze(int environment)
@@ -127,7 +161,41 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Handles the creation of a single maze and then creates copies of it
+    /// </summary>
+    private void DisplayExaminationMazes()
+    {
+        GameObject go = new GameObject();
+        go.transform.SetParent(environments[0]);
+        go.name = "Procedural Maze";
+        go.tag = "Wall";
+        go.layer = 9;
+
+        go.transform.localPosition = Vector3.zero;
+
+        float x = width;
+        float y = environments[0].GetChild(0).localScale.y / 2f;
+        float z = width;
+        environments[0].GetChild(0).localPosition = new Vector3(x, y, z);
+
+        MeshFilter mf = go.AddComponent<MeshFilter>();
+        mf.mesh = meshGenerator.FromData(data);
+        
+        MeshCollider mc = go.AddComponent<MeshCollider>();
+        mc.sharedMesh = mf.mesh;
+
+        MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        mr.materials = new Material[2] {mazeMat1, mazeMat2};
+
+        for(int i = 1; i < environments.Length; i++)
+        {
+            Instantiate(go, environments[i].position, Quaternion.identity).transform.SetParent(environments[i]);
+            environments[i].GetChild(0).localPosition = new Vector3(x, y, z);
+        }
+    }
+
+    /// <summary>
+    /// Destroys the specified maze
     /// </summary>
     /// <param name="environment"></param>
     public void DisposeSingleOldMaze(int environment)
@@ -140,7 +208,7 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Places the agents start position into the given maze
     /// </summary>
     /// <param name="location"></param>
     private void PlaceStartTrigger(Transform location = null)
@@ -162,7 +230,7 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Places the goal into the given maze
     /// </summary>
     /// <param name="location"></param>
     private void PlaceGoalTrigger(Transform location = null)
@@ -185,7 +253,7 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Destroys all of the goals and creates them all again
     /// </summary>
     /// <param name="environment"></param>
     public void ResetGoal(int environment)
@@ -203,7 +271,7 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Destroys a specific goal and then creates it again
     /// </summary>
     /// <param name="data"></param>
     public void ResetGoal(System.Tuple<int, int> data)
@@ -213,7 +281,7 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// If randomizeGoals is true returns a randomised position for the goal else returns the top right position of the maze
     /// </summary>
     /// <param name="environment"></param>
     /// <returns></returns>
@@ -229,7 +297,7 @@ public class MazeConstructor : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Shoots a raycast at each possible "square" of the maze and collects the positions which are empty
     /// </summary>
     /// <param name="raycastOrigin"></param>
     /// <returns></returns>
