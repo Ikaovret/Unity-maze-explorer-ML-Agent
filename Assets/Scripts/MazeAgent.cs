@@ -16,21 +16,22 @@ public class MazeAgent : Agent
 
     private Transform hitGoal;
     private LayerMask mask;
-    private int width, height, counter, mazesTillChange = -1;
+    private int width, height, stepsUntilZero, mazesTillChange = -1;
 
     public Transform startPos;
     public List<Transform> goals;
+    public bool evaluationMode = false;
     private bool pausedActions;
 
     public override void OnEpisodeBegin()
     {
         mazesTillChange++;
-        if(mazesTillChange >= mazeCountToChange)
+        if(mazesTillChange >= mazeCountToChange && !evaluationMode)
         {
             mazesTillChange = 0;
             SendMessageUpwards("CreateNewMaze", transform.parent.GetSiblingIndex());
         }
-        counter = MaxStep;
+        stepsUntilZero = MaxStep;
         GameController gc = transform.GetComponentInParent<GameController>();
         width = gc.sizeCols;
         height = gc.sizeRows;
@@ -53,14 +54,14 @@ public class MazeAgent : Agent
            return;
         }
 
-        counter--;
+        stepsUntilZero--;
 
         if(IsCloseToGoal())
         {
             if(hitGoal != null) 
             {
                 SendMessageUpwards("IncreaseScore", transform.parent.GetSiblingIndex(), SendMessageOptions.DontRequireReceiver);
-                if(MaxStep != 0) AddReward((float)counter/MaxStep);
+                if(MaxStep != 0) AddReward((float)stepsUntilZero/MaxStep);
                 SendMessageUpwards("ResetGoal", new System.Tuple<int, int>(transform.parent.GetSiblingIndex(),hitGoal.GetSiblingIndex()));
                 goals.RemoveAt(hitGoal.GetSiblingIndex());
                 EndEpisode();

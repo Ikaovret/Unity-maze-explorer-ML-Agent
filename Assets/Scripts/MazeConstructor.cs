@@ -115,6 +115,8 @@ public class MazeConstructor : MonoBehaviour
             Debug.LogError("Odd numbers work better for dungeon size.");
         }
 
+        DisposeAllOldMazes();
+
         rows = sizeRows;
         cols = sizeCols;
 
@@ -204,6 +206,14 @@ public class MazeConstructor : MonoBehaviour
         for(int i = 3; i < environments[environment].childCount; i++)
         {
             Destroy(environments[environment].GetChild(i).gameObject);
+        }
+    }
+
+    public void DisposeAllOldMazes()
+    {
+        for(int i = 0; i < environments.Length; i++)
+        {
+            DisposeSingleOldMaze(i);
         }
     }
 

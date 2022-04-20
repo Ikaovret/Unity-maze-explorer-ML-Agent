@@ -997,11 +997,5 @@ PrefabInstance:
       propertyPath: m_Name
       value: MazeAgent1
       objectReference: {fileID: 0}
-    - target: {fileID: 126825371834707018, guid: 6546a1f44ddf17f46879b46607cb637b,
-        type: 3}
-      propertyPath: m_Model
-      value: 
-      objectReference: {fileID: 5022602860645237092, guid: 096d21bf174efda4f895b1cba6dcf090,
-        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6546a1f44ddf17f46879b46607cb637b, type: 3}

@@ -30,7 +30,7 @@ public class ExaminationManager : MonoBehaviour
     private int runIndex = 0;
 
     [SerializeField]
-    private int scoreToEnd = 5;
+    private int scoreToEnd = 5, evaluationMaxRunCount = 100;
     [SerializeField]
     private Text timeText;
 
@@ -46,6 +46,8 @@ public class ExaminationManager : MonoBehaviour
 
     void FixedUpdate()
     {
+        if(runIndex >= evaluationMaxRunCount-1) UnityEditor.EditorApplication.isPlaying = false;
+
         time += Time.fixedDeltaTime;
         timeText.text = ((int)time).ToString();
 
@@ -109,6 +111,8 @@ public class ExaminationManager : MonoBehaviour
         WriteFinishedRunsToFile();
 
         timeScores = new float[agents.Length];
+
+        SendMessage("StartNewGame");
     }
 
     /// <summary>
@@ -129,22 +133,19 @@ public class ExaminationManager : MonoBehaviour
     /// </summary>
     private void WriteFinishedRunsToFile()
     {
-        string fileName = "ExaminationTimes.txt";
+        string fileName = "ExaminationTimes.csv";
         StreamWriter sw;
         if(File.Exists(fileName))
         {
             runIndex++;
             sw = File.AppendText(fileName);
-            sw.WriteLine($"Run count {runIndex}");
-            sw.WriteLine("");
             WriteScore(sw);
         }
         else
         {
             using (sw = new StreamWriter(fileName))
             {
-                sw.WriteLine($"Time it took to finish {scoreToEnd} episodes");
-                sw.WriteLine("");
+                WriteTitle(sw);
 
                 WriteScore(sw);
             }
@@ -159,13 +160,57 @@ public class ExaminationManager : MonoBehaviour
     /// <param name="sw"></param>
     private void WriteScore(StreamWriter sw)
     {
+        string line = $"{runIndex+1},";
         // Finish times
         for(int i = 0; i < agents.Length; i++)
         {
-            sw.WriteLine($"{GetLocationString(i)}: {timeScores[i]}");
+            line += FloatToStringWithPeriod(timeScores[i]);
+            if(i < agents.Length-1)
+            {
+                line += ",";
+            }
         }
+        sw.WriteLine(line);
         
-        sw.WriteLine($"----------------------------");
+    }
+
+    /// <summary>
+    /// Makes the float to string with a period instead of comma separating the decimals
+    /// </summary>
+    /// <param name="number"></param>
+    /// <returns></returns>
+    private string FloatToStringWithPeriod(float number)
+    {
+        string f = "";
+
+        int whole = (int)number;
+
+        f += whole;
+
+        f += ".";
+
+        f += (number-(float)whole).ToString().Remove(0,2);
+
+        return f;
+    }
+
+    /// <summary>
+    /// Writes the titles of each field for CSV-file
+    /// </summary>
+    /// <param name="sw"></param>
+    private void WriteTitle(StreamWriter sw)
+    {
+        
+        string line = "RunCount,";
+        for(int i = 0; i < agents.Length; i++)
+        {
+            line += GetLocationString(i);
+            if(i < agents.Length-1)
+            {
+                line += ",";
+            }
+        }
+        sw.WriteLine(line);
     }
 
     /// <summary>

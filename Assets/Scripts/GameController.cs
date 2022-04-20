@@ -31,9 +31,18 @@ public class GameController : MonoBehaviour
     {
         env = Academy.Instance.EnvironmentParameters;
         generator = GetComponent<MazeConstructor>();
-        int envParam = (int)env.GetWithDefault("MazeSize", 21);
-        ChangeMazeSize(envParam, envParam+2);
+        if(!examinationMode)
+        {
+            int envParam = (int)env.GetWithDefault("MazeSize", 19);
+            ChangeMazeSize(envParam, envParam+2);
+        }
         StartNewGame();
+    }
+
+    void FixedUpdate() 
+    {
+        time += Time.fixedDeltaTime;
+        if(goalReached && time > 3) goalReached = false;
     }
 
     /// <summary>
@@ -62,8 +71,16 @@ public class GameController : MonoBehaviour
     /// <param name="environment"></param>
     public void CreateNewMaze(int environment)
     {
-        int envParam = (int)env.GetWithDefault("MazeSize", 21);
-        ChangeMazeSize(envParam, envParam+2);
-        generator.GenerateSingleMaze(sizeRows, sizeCols, environment);
+        if(examinationMode && !goalReached)
+        {
+            goalReached = true;
+            generator.GenerateExaminationMazes(sizeRows, sizeCols);
+        }
+        else
+        {
+            int envParam = (int)env.GetWithDefault("MazeSize", 19);
+            ChangeMazeSize(envParam, envParam+2);
+            generator.GenerateSingleMaze(sizeRows, sizeCols, environment);
+        }
     }
 }

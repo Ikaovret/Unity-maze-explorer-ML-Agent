@@ -474,6 +474,22 @@ PrefabInstance:
       propertyPath: MaxStep
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6790922255291331448, guid: 18fa9b867e8c2c940a081e95435a80b9,
+        type: 3}
+      propertyPath: evaluationMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6790922255291331448, guid: 18fa9b867e8c2c940a081e95435a80b9,
+        type: 3}
+      propertyPath: mazeCountToChange
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6790922255291331451, guid: 18fa9b867e8c2c940a081e95435a80b9,
+        type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: f1d3c9834fa03de4faf5b97aac872905,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 18fa9b867e8c2c940a081e95435a80b9, type: 3}
 --- !u!1 &438776317
@@ -781,6 +797,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7327144381098553914, guid: c057449472ff4d74f96d2d1c4ccebc4e,
         type: 3}
+      propertyPath: m_sizeCols
+      value: 23
+      objectReference: {fileID: 0}
+    - target: {fileID: 7327144381098553914, guid: c057449472ff4d74f96d2d1c4ccebc4e,
+        type: 3}
+      propertyPath: m_sizeRows
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 7327144381098553914, guid: c057449472ff4d74f96d2d1c4ccebc4e,
+        type: 3}
       propertyPath: examinationMode
       value: 1
       objectReference: {fileID: 0}
@@ -1025,6 +1051,22 @@ PrefabInstance:
       propertyPath: MaxStep
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6790922255291331448, guid: 18fa9b867e8c2c940a081e95435a80b9,
+        type: 3}
+      propertyPath: evaluationMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6790922255291331448, guid: 18fa9b867e8c2c940a081e95435a80b9,
+        type: 3}
+      propertyPath: mazeCountToChange
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6790922255291331451, guid: 18fa9b867e8c2c940a081e95435a80b9,
+        type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 449cc8e228494a64192f43f526ed3b66,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 18fa9b867e8c2c940a081e95435a80b9, type: 3}
 --- !u!1001 &1347735456
@@ -1104,6 +1146,22 @@ PrefabInstance:
       propertyPath: MaxStep
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 126825371834707017, guid: 6546a1f44ddf17f46879b46607cb637b,
+        type: 3}
+      propertyPath: evaluationMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 126825371834707017, guid: 6546a1f44ddf17f46879b46607cb637b,
+        type: 3}
+      propertyPath: mazeCountToChange
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 126825371834707018, guid: 6546a1f44ddf17f46879b46607cb637b,
+        type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 60f05c8c34913324494717008867b9ff,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6546a1f44ddf17f46879b46607cb637b, type: 3}
 --- !u!1001 &1362579014
@@ -1183,6 +1241,22 @@ PrefabInstance:
       propertyPath: MaxStep
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 126825371834707017, guid: 6546a1f44ddf17f46879b46607cb637b,
+        type: 3}
+      propertyPath: evaluationMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 126825371834707017, guid: 6546a1f44ddf17f46879b46607cb637b,
+        type: 3}
+      propertyPath: mazeCountToChange
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 126825371834707018, guid: 6546a1f44ddf17f46879b46607cb637b,
+        type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: c5f3636ea407833478f325014909da09,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6546a1f44ddf17f46879b46607cb637b, type: 3}
 --- !u!1 &1461107597 stripped
@@ -1203,7 +1277,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fb4fc317bb7ed542bf996a64ba925b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreToEnd: 5
+  scoreToEnd: 1
+  evaluationMaxRunCount: 100
   timeText: {fileID: 1937362343}
 --- !u!1 &1770273923
 GameObject:
