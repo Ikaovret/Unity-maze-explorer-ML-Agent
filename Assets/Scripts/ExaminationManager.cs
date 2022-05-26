@@ -223,9 +223,9 @@ public class ExaminationManager : MonoBehaviour
         switch(index)
         {
             case 0:
-                return "VectorObs";
+                return "Vector";
             case 1:
-                return "VectorObsCurriculum";
+                return "VectorCurriculum";
             case 2:
                 return "Raycast";
             case 3:
